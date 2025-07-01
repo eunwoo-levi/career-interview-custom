@@ -236,7 +236,39 @@ export function getQuestionsForConfig(config: InterviewConfig): Question[] {
     const experienceMatch = question.experience.includes(config.experience);
     const companyMatch = question.companyType.includes(config.companyType);
     
-    return fieldMatch && experienceMatch && companyMatch;
+    // 카테고리 필터링 추가
+    const categoryMatch = config.categories.length === 0 || 
+      config.categories.some(category => {
+        // 카테고리 ID를 한국어 카테고리명으로 매핑
+        const categoryMap: { [key: string]: string } = {
+          'react': 'React',
+          'javascript': 'JavaScript', 
+          'typescript': 'TypeScript',
+          'css': 'CSS',
+          'performance': '성능 최적화',
+          'java': 'Java',
+          'spring': 'Spring',
+          'nodejs': 'Node.js',
+          'database': '데이터베이스',
+          'api': 'API 설계',
+          'security': '보안',
+          'docker': 'Docker',
+          'kubernetes': 'Kubernetes', 
+          'aws': 'AWS',
+          'cicd': 'CI/CD',
+          'monitoring': '모니터링',
+          'network': '네트워크',
+          'datastructure': '자료구조',
+          'algorithm': '알고리즘',
+          'os': '운영체제',
+          'architecture': '아키텍처'
+        };
+        
+        const mappedCategory = categoryMap[category];
+        return mappedCategory && question.category.includes(mappedCategory);
+      });
+    
+    return fieldMatch && experienceMatch && companyMatch && categoryMatch;
   });
   
   console.log('Filtered questions count:', filteredQuestions.length);

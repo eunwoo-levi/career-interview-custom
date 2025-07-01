@@ -4,6 +4,7 @@ export interface InterviewConfig {
   experience: 'junior' | '1-3years' | '3-5years' | 'senior';
   companyType: 'startup' | 'small' | 'large' | 'global';
   questionCount: number;
+  categories: string[];
 }
 
 export interface Question {
@@ -22,4 +23,11 @@ export interface InterviewResult {
   userAnswer: string;
   feedback?: string;
   score?: number;
+}
+
+export interface CategoryOption {
+  id: string;
+  label: string;
+  description: string;
+  field: string[];
 }

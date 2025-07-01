@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { InterviewConfig } from '@/types/interview';
 import { Code, Server, Settings, Globe, Building, Briefcase, Users } from 'lucide-react';
+import CategorySelector from './CategorySelector';
 
 interface InterviewSetupProps {
   onStartInterview: (config: InterviewConfig) => void;
@@ -14,6 +14,7 @@ const InterviewSetup: React.FC<InterviewSetupProps> = ({ onStartInterview }) => 
   const [selectedField, setSelectedField] = useState<InterviewConfig['field'] | null>(null);
   const [selectedExperience, setSelectedExperience] = useState<InterviewConfig['experience'] | null>(null);
   const [selectedCompanyType, setSelectedCompanyType] = useState<InterviewConfig['companyType'] | null>(null);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [questionCount, setQuestionCount] = useState(10);
 
   const fields = [
@@ -38,17 +39,18 @@ const InterviewSetup: React.FC<InterviewSetupProps> = ({ onStartInterview }) => 
   ];
 
   const handleStartInterview = () => {
-    if (selectedField && selectedExperience && selectedCompanyType) {
+    if (selectedField && selectedExperience && selectedCompanyType && selectedCategories.length > 0) {
       onStartInterview({
         field: selectedField,
         experience: selectedExperience,
         companyType: selectedCompanyType,
-        questionCount
+        questionCount,
+        categories: selectedCategories
       });
     }
   };
 
-  const isReadyToStart = selectedField && selectedExperience && selectedCompanyType;
+  const isReadyToStart = selectedField && selectedExperience && selectedCompanyType && selectedCategories.length > 0;
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -85,6 +87,13 @@ const InterviewSetup: React.FC<InterviewSetupProps> = ({ onStartInterview }) => 
           </div>
         </CardContent>
       </Card>
+
+      {/* 카테고리 선택 */}
+      <CategorySelector
+        selectedField={selectedField || ''}
+        selectedCategories={selectedCategories}
+        onCategoriesChange={setSelectedCategories}
+      />
 
       {/* 경력 레벨 선택 */}
       <Card className="shadow-lg border-0 bg-white/80 backdrop-blur-sm">
@@ -187,6 +196,9 @@ const InterviewSetup: React.FC<InterviewSetupProps> = ({ onStartInterview }) => 
                   </Badge>
                   <Badge variant="secondary" className="bg-white/20 text-white">
                     {companyTypes.find(c => c.id === selectedCompanyType)?.label}
+                  </Badge>
+                  <Badge variant="secondary" className="bg-white/20 text-white">
+                    {selectedCategories.length}개 카테고리
                   </Badge>
                   <Badge variant="secondary" className="bg-white/20 text-white">
                     {questionCount}개 질문
