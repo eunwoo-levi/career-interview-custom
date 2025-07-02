@@ -23,12 +23,14 @@ const VoiceInterview: React.FC<VoiceInterviewProps> = ({ config, onEndInterview 
   const [bookmarkedQuestions, setBookmarkedQuestions] = useState<Set<string>>(new Set());
   const [apiKey, setApiKey] = useState('');
   const [agentId, setAgentId] = useState('');
+  const [isSetupVisible, setIsSetupVisible] = useState(true);
   const { toast } = useToast();
 
   const conversation = useConversation({
     onConnect: () => {
       console.log('Voice conversation connected');
       setIsTimerActive(true);
+      setIsSetupVisible(false);
       toast({ title: "음성 면접 시작", description: "면접관과 대화를 시작합니다." });
     },
     onDisconnect: () => {
@@ -75,15 +77,26 @@ const VoiceInterview: React.FC<VoiceInterviewProps> = ({ config, onEndInterview 
     }
 
     try {
+      console.log('Starting voice interview with agentId:', agentId);
+      // 마이크 권한 요청
+      await navigator.mediaDevices.getUserMedia({ audio: true });
+      
+      // 세션 시작  
       await conversation.startSession({ agentId });
+      console.log('Voice session started successfully');
     } catch (error) {
       console.error('Failed to start voice conversation:', error);
-      toast({ title: "연결 실패", description: "음성 면접 연결에 실패했습니다.", variant: "destructive" });
+      toast({ title: "연결 실패", description: "음성 면접 연결에 실패했습니다. 마이크 권한을 확인해주세요.", variant: "destructive" });
     }
   };
 
   const handleStopVoiceInterview = async () => {
-    await conversation.endSession();
+    try {
+      await conversation.endSession();
+      setIsSetupVisible(true);
+    } catch (error) {
+      console.error('Failed to end voice conversation:', error);
+    }
   };
 
   const handleNextQuestion = () => {
@@ -100,9 +113,18 @@ const VoiceInterview: React.FC<VoiceInterviewProps> = ({ config, onEndInterview 
     const newBookmarks = new Set(bookmarkedQuestions);
     if (newBookmarks.has(questionId)) {
       newBookmarks.delete(questionId);
+      // 로컬 스토리지에서도 제거
+      const existingBookmarks = JSON.parse(localStorage.getItem('bookmarkedQuestions') || '[]');
+      const updatedBookmarks = existingBookmarks.filter((q: Question) => q.id !== questionId);
+      localStorage.setItem('bookmarkedQuestions', JSON.stringify(updatedBookmarks));
       toast({ title: "북마크 해제", description: "질문 북마크가 해제되었습니다." });
     } else {
       newBookmarks.add(questionId);
+      // 로컬 스토리지에 저장
+      const currentQuestion = questions[currentQuestionIndex];
+      const existingBookmarks = JSON.parse(localStorage.getItem('bookmarkedQuestions') || '[]');
+      const updatedBookmarks = [...existingBookmarks, currentQuestion];
+      localStorage.setItem('bookmarkedQuestions', JSON.stringify(updatedBookmarks));
       toast({ title: "북마크 추가", description: "질문이 북마크에 추가되었습니다." });
     }
     setBookmarkedQuestions(newBookmarks);
@@ -146,7 +168,7 @@ const VoiceInterview: React.FC<VoiceInterviewProps> = ({ config, onEndInterview 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* API 설정 */}
-      {!conversation.status && (
+      {isSetupVisible && (
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle>음성 면접 설정</CardTitle>
@@ -172,7 +194,8 @@ const VoiceInterview: React.FC<VoiceInterviewProps> = ({ config, onEndInterview 
                 className="w-full p-2 border rounded"
               />
             </div>
-            <Button onClick={handleStartVoiceInterview} className="w-full">
+            <Button onClick={handleStartVoiceInterview} className="w-full" disabled={!apiKey || !agentId}>
+              <Mic className="h-4 w-4 mr-2" />
               음성 면접 시작하기
             </Button>
           </CardContent>
@@ -247,7 +270,7 @@ const VoiceInterview: React.FC<VoiceInterviewProps> = ({ config, onEndInterview 
                   음성 면접 종료
                 </Button>
               ) : (
-                <Button onClick={handleStartVoiceInterview} disabled={!apiKey || !agentId}>
+                <Button onClick={handleStartVoiceInterview} disabled={!apiKey || !agentId || isSetupVisible}>
                   <Mic className="h-4 w-4 mr-2" />
                   음성 면접 시작
                 </Button>
