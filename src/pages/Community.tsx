@@ -1,6 +1,8 @@
+
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import WritePostModal from '@/components/WritePostModal';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,8 +22,7 @@ interface Post {
 
 const Community = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
-
-  const mockPosts: Post[] = [
+  const [posts, setPosts] = useState<Post[]>([
     {
       id: '1',
       title: '프론트엔드 면접에서 가장 많이 나오는 React 질문들',
@@ -66,19 +67,41 @@ const Community = () => {
       createdAt: '2일 전',
       tags: ['네트워크', 'CS', '신입']
     }
-  ];
+  ]);
 
   const categories = [
     { id: 'all', label: '전체', color: 'bg-gray-100 text-gray-800' },
     { id: 'frontend', label: '프론트엔드', color: 'bg-blue-100 text-blue-800' },
     { id: 'backend', label: '백엔드', color: 'bg-green-100 text-green-800' },
     { id: 'devops', label: 'DevOps', color: 'bg-purple-100 text-purple-800' },
-    { id: 'cs', label: 'CS', color: 'bg-orange-100 text-orange-800' }
+    { id: 'cs', label: 'CS', color: 'bg-orange-100 text-orange-800' },
+    { id: 'general', label: '일반', color: 'bg-gray-100 text-gray-800' }
   ];
 
   const filteredPosts = selectedCategory === 'all' 
-    ? mockPosts 
-    : mockPosts.filter(post => post.category === selectedCategory);
+    ? posts 
+    : posts.filter(post => post.category === selectedCategory);
+
+  const handleNewPost = (newPostData: {
+    title: string;
+    content: string;
+    category: string;
+    tags: string[];
+  }) => {
+    const newPost: Post = {
+      id: String(posts.length + 1),
+      title: newPostData.title,
+      content: newPostData.content,
+      author: '익명',
+      category: newPostData.category,
+      likes: 0,
+      comments: 0,
+      createdAt: '방금 전',
+      tags: newPostData.tags
+    };
+    
+    setPosts(prevPosts => [newPost, ...prevPosts]);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
@@ -116,7 +139,7 @@ const Community = () => {
               <CardTitle className="text-sm font-medium text-gray-500">전체 게시글</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-blue-600">1,247</div>
+              <div className="text-2xl font-bold text-blue-600">{posts.length}</div>
             </CardContent>
           </Card>
           <Card className="text-center">
@@ -195,10 +218,7 @@ const Community = () => {
 
         {/* Write Post Button */}
         <div className="fixed bottom-8 right-8">
-          <Button size="lg" className="rounded-full shadow-lg">
-            <MessageCircle className="h-5 w-5 mr-2" />
-            글쓰기
-          </Button>
+          <WritePostModal onSubmit={handleNewPost} />
         </div>
       </div>
 

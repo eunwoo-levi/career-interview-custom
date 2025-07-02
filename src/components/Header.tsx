@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Brain, Users, BookOpen, FileText } from 'lucide-react';
+import { Brain, Users, BookOpen, FileText, HelpCircle } from 'lucide-react';
 
 const Header = () => {
   const location = useLocation();
@@ -11,6 +11,7 @@ const Header = () => {
     { path: '/', label: '면접 연습', icon: Brain },
     { path: '/community', label: '커뮤니티', icon: Users },
     { path: '/wrong-answers', label: '오답노트', icon: FileText },
+    { path: '/support', label: '고객센터', icon: HelpCircle },
   ];
 
   return (

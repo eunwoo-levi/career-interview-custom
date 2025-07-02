@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Community from "./pages/Community";
 import Auth from "./pages/Auth";
 import WrongAnswerNote from "./pages/WrongAnswerNote";
+import Support from "./pages/Support";
 import ErrorPage from "./pages/ErrorPage";
 import NotFound from "./pages/NotFound";
 
@@ -37,6 +38,7 @@ const App = () => (
           <Route path="/community" element={<Community />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/wrong-answers" element={<WrongAnswerNote />} />
+          <Route path="/support" element={<Support />} />
           <Route path="/error" element={<ErrorPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
