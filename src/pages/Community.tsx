@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MessageCircle, ThumbsUp, Clock, User, TrendingUp } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 interface Post {
   id: string;
@@ -82,14 +82,11 @@ const Community = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      <Header />
+      
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-block mb-4">
-            <h1 className="text-3xl font-bold text-blue-600 hover:text-blue-700 transition-colors">
-              InterviewAce
-            </h1>
-          </Link>
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
             개발자 <span className="text-blue-600">커뮤니티</span>
           </h2>
@@ -204,6 +201,8 @@ const Community = () => {
           </Button>
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 };

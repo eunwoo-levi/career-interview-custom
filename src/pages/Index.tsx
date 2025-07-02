@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import InterviewSetup from '@/components/InterviewSetup';
@@ -16,13 +16,15 @@ import {
   TrendingUp, 
   CheckCircle, 
   Star,
-  ArrowRight
+  ArrowRight,
+  Play
 } from 'lucide-react';
 
 const Index = () => {
   const [interviewConfig, setInterviewConfig] = useState<InterviewConfig | null>(null);
   const [isInterviewStarted, setIsInterviewStarted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showSetup, setShowSetup] = useState(false);
 
   const handleStartInterview = async (config: InterviewConfig) => {
     setIsLoading(true);
@@ -36,6 +38,7 @@ const Index = () => {
   const handleEndInterview = () => {
     setIsInterviewStarted(false);
     setInterviewConfig(null);
+    setShowSetup(false);
   };
 
   const features = [
@@ -119,6 +122,18 @@ const Index = () => {
     );
   }
 
+  if (showSetup) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+        <Header />
+        <div className="container mx-auto px-4 py-8">
+          <InterviewSetup onStartInterview={handleStartInterview} />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <Header />
@@ -137,13 +152,20 @@ const Index = () => {
             개발자 커뮤니티에서 경험을 공유하며 함께 성장하세요
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="px-8 py-3 text-lg">
+            <Button 
+              size="lg" 
+              className="px-8 py-3 text-lg"
+              onClick={() => setShowSetup(true)}
+            >
+              <Play className="mr-2 h-5 w-5" />
               지금 시작하기
-              <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-            <Button size="lg" variant="outline" className="px-8 py-3 text-lg">
-              서비스 둘러보기
-            </Button>
+            <Link to="/community">
+              <Button size="lg" variant="outline" className="px-8 py-3 text-lg w-full">
+                서비스 둘러보기
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
@@ -193,19 +215,6 @@ const Index = () => {
             );
           })}
         </div>
-      </section>
-
-      {/* Interview Setup Section */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            면접 연습 <span className="text-blue-600">시작하기</span>
-          </h2>
-          <p className="text-xl text-gray-600">
-            당신만의 맞춤형 면접 질문을 받아보세요
-          </p>
-        </div>
-        <InterviewSetup onStartInterview={handleStartInterview} />
       </section>
 
       {/* Testimonials Section */}

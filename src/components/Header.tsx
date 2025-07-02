@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Brain, Users, BookOpen } from 'lucide-react';
+import { Brain, Users, BookOpen, FileText } from 'lucide-react';
 
 const Header = () => {
   const location = useLocation();
@@ -10,6 +10,7 @@ const Header = () => {
   const navItems = [
     { path: '/', label: '면접 연습', icon: Brain },
     { path: '/community', label: '커뮤니티', icon: Users },
+    { path: '/wrong-answers', label: '오답노트', icon: FileText },
   ];
 
   return (
@@ -43,12 +44,16 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center space-x-2">
-            <Button variant="outline" size="sm">
-              로그인
-            </Button>
-            <Button size="sm">
-              회원가입
-            </Button>
+            <Link to="/auth">
+              <Button variant="outline" size="sm">
+                로그인
+              </Button>
+            </Link>
+            <Link to="/auth">
+              <Button size="sm">
+                회원가입
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
