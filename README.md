@@ -1,12 +1,5 @@
 [배포 URL](https://career-interview-custom.lovable.app)
 
----
-title: "개발자 면접 질문 인터뷰 서비스 기획안"
-author: "Yeaji Kim"
-publishDate: "2025-07-01"
-category: "Project Ideas"
----
-
 # 💼 개발자 면접 질문 인터뷰 서비스 기획안
 
 ## 🎯 서비스 개요
