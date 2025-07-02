@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { InterviewConfig, Question } from '@/types/interview';
 import { getQuestionsForConfig } from '@/utils/questionGenerator';
-import { Clock, CheckCircle, XCircle } from 'lucide-react';
+import { Clock, CheckCircle, BookmarkPlus, BookmarkCheck } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface InterviewSessionProps {
   config: InterviewConfig;
@@ -19,9 +19,11 @@ const InterviewSession: React.FC<InterviewSessionProps> = ({ config, onEndInterv
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<string[]>([]);
   const [currentAnswer, setCurrentAnswer] = useState('');
-  const [timeLeft, setTimeLeft] = useState(180); // 3분
+  const [timeLeft, setTimeLeft] = useState(180);
   const [isTimerActive, setIsTimerActive] = useState(true);
   const [showResults, setShowResults] = useState(false);
+  const [bookmarkedQuestions, setBookmarkedQuestions] = useState<Set<string>>(new Set());
+  const { toast } = useToast();
 
   useEffect(() => {
     const generatedQuestions = getQuestionsForConfig(config);
@@ -100,6 +102,18 @@ const InterviewSession: React.FC<InterviewSessionProps> = ({ config, onEndInterv
     }
   };
 
+  const handleBookmark = (questionId: string) => {
+    const newBookmarks = new Set(bookmarkedQuestions);
+    if (newBookmarks.has(questionId)) {
+      newBookmarks.delete(questionId);
+      toast({ title: "북마크 해제", description: "질문 북마크가 해제되었습니다." });
+    } else {
+      newBookmarks.add(questionId);
+      toast({ title: "북마크 추가", description: "질문이 북마크에 추가되었습니다." });
+    }
+    setBookmarkedQuestions(newBookmarks);
+  };
+
   if (questions.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -124,7 +138,7 @@ const InterviewSession: React.FC<InterviewSessionProps> = ({ config, onEndInterv
           <div className="space-y-6">
             <div className="text-center">
               <h3 className="text-xl font-semibold mb-4">면접 결과 요약</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <p className="text-sm text-gray-600">총 질문 수</p>
                   <p className="text-2xl font-bold text-blue-600">{questions.length}개</p>
@@ -140,6 +154,10 @@ const InterviewSession: React.FC<InterviewSessionProps> = ({ config, onEndInterv
                   <p className="text-2xl font-bold text-purple-600">
                     {Math.round((answers.filter(answer => answer.trim().length > 0).length / questions.length) * 100)}%
                   </p>
+                </div>
+                <div className="bg-yellow-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600">북마크</p>
+                  <p className="text-2xl font-bold text-yellow-600">{bookmarkedQuestions.size}개</p>
                 </div>
               </div>
             </div>
@@ -210,9 +228,23 @@ const InterviewSession: React.FC<InterviewSessionProps> = ({ config, onEndInterv
       {/* 질문 카드 */}
       <Card className="shadow-lg">
         <CardHeader>
-          <CardTitle className="text-xl font-semibold text-gray-800">
-            {currentQuestion.question}
-          </CardTitle>
+          <div className="flex justify-between items-start">
+            <CardTitle className="text-xl font-semibold text-gray-800 flex-1">
+              {currentQuestion.question}
+            </CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleBookmark(currentQuestion.id)}
+              className="ml-4"
+            >
+              {bookmarkedQuestions.has(currentQuestion.id) ? (
+                <BookmarkCheck className="h-4 w-4 text-blue-600" />
+              ) : (
+                <BookmarkPlus className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="p-6">
           <Textarea
@@ -243,6 +275,18 @@ const InterviewSession: React.FC<InterviewSessionProps> = ({ config, onEndInterv
           </div>
         </CardContent>
       </Card>
+
+      {/* 북마크된 질문 개수 */}
+      {bookmarkedQuestions.size > 0 && (
+        <Card className="shadow-lg bg-blue-50">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-center gap-2 text-blue-700">
+              <BookmarkCheck className="h-5 w-5" />
+              <span>북마크된 질문: {bookmarkedQuestions.size}개</span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* 면접 종료 버튼 */}
       <div className="text-center">

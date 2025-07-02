@@ -3,14 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { InterviewConfig } from '@/types/interview';
-import { Code, Server, Settings, Globe, Building, Briefcase, Users } from 'lucide-react';
+import { Code, Server, Settings, Globe, Building, Briefcase, Users, Mic, MessageSquare } from 'lucide-react';
 import CategorySelector from './CategorySelector';
 
 interface InterviewSetupProps {
   onStartInterview: (config: InterviewConfig) => void;
+  onStartVoiceInterview?: (config: InterviewConfig) => void;
 }
 
-const InterviewSetup: React.FC<InterviewSetupProps> = ({ onStartInterview }) => {
+const InterviewSetup: React.FC<InterviewSetupProps> = ({ onStartInterview, onStartVoiceInterview }) => {
   const [selectedField, setSelectedField] = useState<InterviewConfig['field'] | null>(null);
   const [selectedExperience, setSelectedExperience] = useState<InterviewConfig['experience'] | null>(null);
   const [selectedCompanyType, setSelectedCompanyType] = useState<InterviewConfig['companyType'] | null>(null);
@@ -38,15 +39,21 @@ const InterviewSetup: React.FC<InterviewSetupProps> = ({ onStartInterview }) => 
     { id: 'global', label: '글로벌 기업', icon: Globe, description: '국제적 기준' }
   ];
 
-  const handleStartInterview = () => {
+  const handleStartInterview = (isVoice: boolean = false) => {
     if (selectedField && selectedExperience && selectedCompanyType && selectedCategories.length > 0) {
-      onStartInterview({
+      const config = {
         field: selectedField,
         experience: selectedExperience,
         companyType: selectedCompanyType,
         questionCount,
         categories: selectedCategories
-      });
+      };
+      
+      if (isVoice && onStartVoiceInterview) {
+        onStartVoiceInterview(config);
+      } else {
+        onStartInterview(config);
+      }
     }
   };
 
@@ -184,10 +191,10 @@ const InterviewSetup: React.FC<InterviewSetupProps> = ({ onStartInterview }) => 
       {isReadyToStart && (
         <Card className="shadow-lg border-0 bg-gradient-to-r from-blue-500 to-purple-600 text-white">
           <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <div className="text-center md:text-left">
+            <div className="flex flex-col gap-6">
+              <div className="text-center">
                 <h3 className="text-xl font-bold mb-2">면접 준비 완료!</h3>
-                <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                <div className="flex flex-wrap gap-2 justify-center">
                   <Badge variant="secondary" className="bg-white/20 text-white">
                     {fields.find(f => f.id === selectedField)?.label}
                   </Badge>
@@ -205,13 +212,28 @@ const InterviewSetup: React.FC<InterviewSetupProps> = ({ onStartInterview }) => 
                   </Badge>
                 </div>
               </div>
-              <Button 
-                onClick={handleStartInterview}
-                size="lg"
-                className="bg-white text-blue-600 hover:bg-gray-100 font-bold px-8"
-              >
-                면접 시작하기
-              </Button>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button 
+                  onClick={() => handleStartInterview(false)}
+                  size="lg"
+                  className="bg-white text-blue-600 hover:bg-gray-100 font-bold px-8"
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  텍스트 면접 시작
+                </Button>
+                {onStartVoiceInterview && (
+                  <Button 
+                    onClick={() => handleStartInterview(true)}
+                    size="lg"
+                    variant="outline"
+                    className="bg-white/10 text-white border-white hover:bg-white/20 font-bold px-8"
+                  >
+                    <Mic className="h-4 w-4 mr-2" />
+                    음성 면접 시작
+                  </Button>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
