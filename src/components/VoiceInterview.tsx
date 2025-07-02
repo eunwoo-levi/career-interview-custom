@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -78,15 +77,44 @@ const VoiceInterview: React.FC<VoiceInterviewProps> = ({ config, onEndInterview 
 
     try {
       console.log('Starting voice interview with agentId:', agentId);
-      // 마이크 권한 요청
-      await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log('API Key provided:', apiKey ? 'Yes' : 'No');
       
-      // 세션 시작  
-      await conversation.startSession({ agentId });
+      // 마이크 권한 요청
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log('Microphone access granted');
+      
+      // 스트림 정리
+      stream.getTracks().forEach(track => track.stop());
+      
+      // ElevenLabs 설정
+      if (typeof window !== 'undefined') {
+        (window as any).ELEVENLABS_API_KEY = apiKey;
+      }
+      
+      // 세션 시작
+      console.log('Attempting to start session...');
+      await conversation.startSession({ 
+        agentId: agentId,
+        // API 키를 헤더에 추가하는 방법이 있다면 사용
+      });
       console.log('Voice session started successfully');
+      
+      toast({ title: "연결 성공", description: "음성 면접이 시작되었습니다!" });
+      
     } catch (error) {
       console.error('Failed to start voice conversation:', error);
-      toast({ title: "연결 실패", description: "음성 면접 연결에 실패했습니다. 마이크 권한을 확인해주세요.", variant: "destructive" });
+      
+      if (error instanceof Error) {
+        if (error.name === 'NotAllowedError') {
+          toast({ title: "마이크 권한 필요", description: "마이크 접근 권한을 허용해주세요.", variant: "destructive" });
+        } else if (error.message.includes('401') || error.message.includes('unauthorized')) {
+          toast({ title: "인증 실패", description: "API 키 또는 Agent ID를 확인해주세요.", variant: "destructive" });
+        } else {
+          toast({ title: "연결 실패", description: `음성 면접 연결에 실패했습니다: ${error.message}`, variant: "destructive" });
+        }
+      } else {
+        toast({ title: "연결 실패", description: "음성 면접 연결에 실패했습니다. 설정을 확인해주세요.", variant: "destructive" });
+      }
     }
   };
 
@@ -94,6 +122,7 @@ const VoiceInterview: React.FC<VoiceInterviewProps> = ({ config, onEndInterview 
     try {
       await conversation.endSession();
       setIsSetupVisible(true);
+      toast({ title: "면접 종료", description: "음성 면접이 종료되었습니다." });
     } catch (error) {
       console.error('Failed to end voice conversation:', error);
     }
@@ -172,6 +201,9 @@ const VoiceInterview: React.FC<VoiceInterviewProps> = ({ config, onEndInterview 
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle>음성 면접 설정</CardTitle>
+            <p className="text-sm text-gray-600">
+              ElevenLabs의 Conversational AI 기능을 사용합니다. API 키와 Agent ID가 필요합니다.
+            </p>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
@@ -180,9 +212,12 @@ const VoiceInterview: React.FC<VoiceInterviewProps> = ({ config, onEndInterview 
                 type="password"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
-                placeholder="ElevenLabs API 키를 입력하세요"
-                className="w-full p-2 border rounded"
+                placeholder="sk-..."
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                ElevenLabs에서 발급받은 API 키를 입력하세요
+              </p>
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Agent ID</label>
@@ -191,10 +226,17 @@ const VoiceInterview: React.FC<VoiceInterviewProps> = ({ config, onEndInterview 
                 value={agentId}
                 onChange={(e) => setAgentId(e.target.value)}
                 placeholder="Agent ID를 입력하세요"
-                className="w-full p-2 border rounded"
+                className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                ElevenLabs Conversational AI에서 생성한 Agent ID를 입력하세요
+              </p>
             </div>
-            <Button onClick={handleStartVoiceInterview} className="w-full" disabled={!apiKey || !agentId}>
+            <Button 
+              onClick={handleStartVoiceInterview} 
+              className="w-full bg-blue-600 hover:bg-blue-700" 
+              disabled={!apiKey.trim() || !agentId.trim()}
+            >
               <Mic className="h-4 w-4 mr-2" />
               음성 면접 시작하기
             </Button>

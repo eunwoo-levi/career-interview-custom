@@ -124,11 +124,6 @@ const BookmarkedQuestions = () => {
                         <h3 className="text-lg font-semibold text-gray-800 mb-2">
                           {question.question}
                         </h3>
-                        {question.description && (
-                          <p className="text-gray-600 text-sm">
-                            {question.description}
-                          </p>
-                        )}
                       </div>
                       <Button
                         variant="outline"
